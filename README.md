@@ -25,6 +25,14 @@ $ bun install @nestjs/config
 ```bash
 $ bun install class-validator class-transformer @nestjs/mapped-types
 ```
+# Instalacion de JSON Web Token
+```bash
+$ npm install --save @nestjs/jwt
+```
+ # Instalacion de node.bcrypt.js
+```bash
+$ npm instal bcrypt
+```
 # creacion del modulo de autores en nestjs
 ```bash
 $ nest g resource authors

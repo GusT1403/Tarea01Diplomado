@@ -1,10 +1,11 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Author } from './entities/author.entity';
 import { Book } from 'src/books/entities/book.entity';
+import { UserRoleEnum } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthorsService {
@@ -16,7 +17,14 @@ export class AuthorsService {
     private bookRepository: Repository<Book>
   ) {}
 
-  async create(createAuthorDto: CreateAuthorDto): Promise<Author> {
+  async create(
+    createAuthorDto: CreateAuthorDto,
+    login: string,
+    role: UserRoleEnum,
+  ): Promise<Author> {
+    if (role != UserRoleEnum.ADMIN) {
+      throw new ForbiddenException('Only admins can create authors');
+    }
     const existAuthor = await this.authorRepository.exists({
       where: { name: createAuthorDto.name}
     });
@@ -53,7 +61,15 @@ private async findOneAuthor(id: number, relations = false): Promise<Author> {
     return this.findOneAuthor(id, relations);
   }
 
-  async update(id: number, updateAuthorDto: UpdateAuthorDto): Promise<Author> {
+  async update(
+    id: number, updateAuthorDto: UpdateAuthorDto,
+    login: string,
+    role: UserRoleEnum
+  ): Promise<Author> {
+    if (role != UserRoleEnum.ADMIN) {
+      throw new ForbiddenException('Only admins can update authors');
+    }
+
     const author = await this.findOneAuthor(id);
     if (updateAuthorDto.name != null) {
       author.name = updateAuthorDto.name;
@@ -67,7 +83,10 @@ private async findOneAuthor(id: number, relations = false): Promise<Author> {
     return this.authorRepository.save(author);
   }
 
-  async remove(id: number, cascade: boolean) {//cascade is a boolean parameter that indicates whether to delete the author's books or not
+  async remove(id: number, cascade: boolean, role: UserRoleEnum) {//cascade is a boolean parameter that indicates whether to delete the author's books or not
+    if (role != UserRoleEnum.ADMIN) {
+      throw new ForbiddenException('Only admins can delete authors');
+    }
     const author = await this.findOneAuthor(id);
     if (cascade) {
       await this.bookRepository.delete({ author });

@@ -17,6 +17,22 @@ export class Author {
     @UpdateDateColumn({type: 'timestamp without time zone', name: 'updated_at'})
     updated_at: Date;
 
+    @Column({
+        name: 'created_by',
+        type: 'character varying',
+        length: 30,
+        nullable: true,
+      })
+      createdBy: string;
+    
+      @Column({
+        name: 'updated_by',
+        type: 'character varying',
+        length: 30,
+        nullable: true,
+      })
+      updatedBy: string;
+
     @OneToMany(() => Book, (book) => book.author)
     books: Book[];
 }
